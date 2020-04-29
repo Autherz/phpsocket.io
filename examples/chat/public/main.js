@@ -18,6 +18,7 @@ $(function() {
 
   // Prompt for setting a username
   var username;
+  var room;
   var connected = false;
   var typing = false;
   var lastTypingTime;
@@ -25,8 +26,19 @@ $(function() {
 
   var socket = io('http://'+document.domain+':2020');
 
+  // var test_room = 'atisit'
+  // // socket.on('connect', function() {
+  // //   socket.emit('register', test_room)
+  // // })
+  // socket.emit('register', test_room)
+  // socket.emit('add user', JSON.stringify(Object.assign({username: 'bom', room: 'atisit'})));
+  // socket.on('login', function(data) {
+  //   console.log(data);
+  // })
+
   const addParticipantsMessage = (data) => {
     var message = '';
+    log('room: ' + data.room);
     if (data.numUsers === 1) {
       message += "there's 1 participant";
     } else {
@@ -38,7 +50,7 @@ $(function() {
   // Sets the client's username
   const setUsername = () => {
     username = cleanInput($usernameInput.val().trim());
-
+    room = cleanInput($usernameInput.val().trim());
     // If the username is valid
     if (username) {
       $loginPage.fadeOut();
@@ -47,7 +59,8 @@ $(function() {
       $currentInput = $inputMessage.focus();
 
       // Tell the server your username
-      socket.emit('add user', username);
+      socket.emit('register', room)
+      socket.emit('add user', JSON.stringify(Object.assign({username: username, room: room})));
     }
   }
 
@@ -152,9 +165,10 @@ $(function() {
   // Updates the typing event
   const updateTyping = () => {
     if (connected) {
+      console.log(' room in type ', room);
       if (!typing) {
         typing = true;
-        socket.emit('typing');
+        socket.emit('typing', room);
       }
       lastTypingTime = (new Date()).getTime();
 
@@ -193,7 +207,7 @@ $(function() {
   $window.keydown(event => {
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
+      // $currentInput.focus();
     }
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
@@ -215,7 +229,7 @@ $(function() {
 
   // Focus input when clicking anywhere on login page
   $loginPage.click(() => {
-    $currentInput.focus();
+    // $currentInput.focus();
   });
 
   // Focus input when clicking on the message input's border
