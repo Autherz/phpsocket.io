@@ -7,6 +7,16 @@ $(function() {
     '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
   ];
 
+  let guid = () => {
+    let s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
   // Initialize variables
   var $window = $(window);
   var $usernameInput = $('.usernameInput'); // Input for username
@@ -22,6 +32,7 @@ $(function() {
   var connected = false;
   var typing = false;
   var lastTypingTime;
+  var id = guid();
   var $currentInput = $usernameInput.focus();
 
   // http://203.150.243.131:2020/
@@ -40,6 +51,7 @@ $(function() {
 
   const addParticipantsMessage = (data) => {
     var message = '';
+    log('id : ' + data.id)
     log('room: ' + data.room);
     if (data.numUsers === 1) {
       message += "there's 1 participant";
@@ -62,7 +74,7 @@ $(function() {
 
       // Tell the server your username
       socket.emit('register', room)
-      socket.emit('add user', JSON.stringify(Object.assign({username: username, room: room})));
+      socket.emit('add user', JSON.stringify(Object.assign({id: id, username: username, room: room})));
     }
   }
 
@@ -79,7 +91,7 @@ $(function() {
         message: message
       });
       // tell server to execute 'new message' and send along one parameter
-      socket.emit('new message', JSON.stringify(Object.assign({ message: message, room: room})));
+      socket.emit('new message', JSON.stringify(Object.assign({ id: id, message: message, room: room})));
     }
   }
 
@@ -167,7 +179,7 @@ $(function() {
   // Updates the typing event
   const updateTyping = () => {
     if (connected) {
-      console.log(' room in type ', room);
+ 
       if (!typing) {
         typing = true;
         socket.emit('typing', room);
