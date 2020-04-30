@@ -24,7 +24,9 @@ $(function() {
   var lastTypingTime;
   var $currentInput = $usernameInput.focus();
 
+  // http://203.150.243.131:2020/
   var socket = io('http://'+document.domain+':2020');
+  // var socket = io('http://'+ '203.150.243.131' +':2020');
 
   // var test_room = 'atisit'
   // // socket.on('connect', function() {
@@ -77,7 +79,7 @@ $(function() {
         message: message
       });
       // tell server to execute 'new message' and send along one parameter
-      socket.emit('new message', message);
+      socket.emit('new message', JSON.stringify(Object.assign({ message: message, room: room})));
     }
   }
 
